@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation | QAntum PaaS</title>
+    <meta name="description" content="Official documentation for QAntum PaaS — the world's first autonomous behavioral infrastructure.">
+    <link rel="icon" href="/favicon.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syncopate:wght@400;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        /* Shared Styles from index.html (Simplified for Docs) */
+        :root {
+            --bg-primary: #030108;
+            --bg-secondary: #080510;
+            --bg-card: rgba(15, 8, 30, 0.75);
+            --bg-glass: rgba(139, 92, 246, 0.06);
+            --accent-primary: #8b5cf6;
+            --accent-secondary: #06b6d4;
+            --accent-glow: rgba(139, 92, 246, 0.4);
+            --text-primary: #f8fafc;
+            --text-secondary: #a1a1aa;
+            --text-dim: #52525b;
+            --border-subtle: rgba(139, 92, 246, 0.08);
+            --font-display: 'Syncopate', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --radius-md: 16px;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            line-height: 1.7;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .nav {
+            position: fixed;
+            top: 0; width: 100%; z-index: 1000;
+            padding: 16px 40px;
+            display: flex; align-items: center; justify-content: space-between;
+            background: rgba(4, 5, 10, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .nav-logo-group { display: flex; align-items: center; gap: 12px; }
+        .nav-logo {
+            font-family: var(--font-display);
+            font-size: 0.85rem; font-weight: 700; letter-spacing: 3px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .docs-container {
+            max-width: 1200px;
+            margin: 120px auto 80px;
+            padding: 0 40px;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 60px;
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 120px;
+            height: fit-content;
+        }
+        .sidebar-section { margin-bottom: 32px; }
+        .sidebar-title {
+            font-family: var(--font-display);
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+        .sidebar-links { list-style: none; }
+        .sidebar-links li { margin-bottom: 12px; }
+        .sidebar-links a {
+            color: var(--text-secondary);
+            font-size: 0.88rem;
+            transition: color 0.3s;
+        }
+        .sidebar-links a:hover { color: var(--accent-primary); }
+        .sidebar-links a.active { color: var(--accent-primary); font-weight: 600; }
+
+        .content h1 {
+            font-family: var(--font-display);
+            font-size: 2.2rem;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, #fff, #a1a1aa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .content h2 {
+            font-family: var(--font-display);
+            font-size: 1.2rem;
+            margin-top: 48px;
+            margin-bottom: 20px;
+            color: var(--accent-secondary);
+        }
+        .content p { color: var(--text-secondary); margin-bottom: 20px; }
+
+        .code-block {
+            background: #0a0a0c;
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 20px;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: #d1d5db;
+            margin: 24px 0;
+            overflow-x: auto;
+        }
+
+        footer {
+            padding: 48px 40px;
+            border-top: 1px solid var(--border-subtle);
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        @media (max-width: 768px) {
+            .docs-container { grid-template-columns: 1fr; }
+            .sidebar { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <a href="/" class="nav-logo-group">
+            <img src="/logo-dp.png" alt="DP" style="height: 30px; border: 1px solid var(--accent-primary); border-radius: 4px;">
+            <span class="nav-logo">QAntum PaaS</span>
+        </a>
+        <a href="/" style="font-size: 0.8rem; color: var(--text-secondary);">← Back to Home</a>
+    </nav>
+
+    <div class="docs-container">
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">Getting Started</div>
+                <ul class="sidebar-links">
+                    <li><a href="#introduction" class="active">Introduction</a></li>
+                    <li><a href="#architecture">Architecture</a></li>
+                    <li><a href="#governance">Governance</a></li>
+                </ul>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-title">Personas</div>
+                <ul class="sidebar-links">
+                    <li><a href="#archetypes">Archetypes</a></li>
+                    <li><a href="#phantom-engine">Phantom Engine</a></li>
+                    <li><a href="#hydra-network">Hydra Network</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="content">
+            <section id="introduction">
+                <h1>Documentation</h1>
+                <p>Welcome to the QAntum PaaS documentation. This infrastructure represents the convergence of autonomous behavioral engineering and military-grade governance. Every interaction within the system is designed to eliminate entropy and establish deterministic reality.</p>
+                
+                <h2>Core Philosophy</h2>
+                <p>QAntum operates on the principle of <strong>Veritas (Truth)</strong>. In our ecosystem, data is not hypothesized; it is manifested through real-time hardware telemetry and verified behavioral patterns.</p>
+            </section>
+
+            <section id="architecture">
+                <h2>Architecture Overview</h2>
+                <p>The system is built on a distributed Hydra Network, orchestrating over 2,000,000 persona nodes across global edge regions. Each node operates with a dedicated Rust-based kernel ensuring memory safety and zero-latency state transitions.</p>
+                <div class="code-block">
+// Nexus Hybrid Synchronization
+pub async fn sync_node(state: State) -> Result<ZeroEntropy, Error> {
+    let consensus = Hydra::verify(state).await?;
+    Ok(consensus.lock_determinism())
+}
+                </div>
+            </section>
+
+            <section id="archetypes">
+                <h2>Behavioral Archetypes</h2>
+                <p>QAntum supports three primary behavioral signatures, each mathematically calibrated to represent a specific human state:</p>
+                <ul>
+                    <li><strong>Adrenaline:</strong> High-frequency interactions, minimal latency, elevated jitter. Ideal for stress testing.</li>
+                    <li><strong>Fatigue:</strong> Decaying performance, increased error rates, irregular pause distributions.</li>
+                    <li><strong>Sovereign:</strong> The architect's signature. Perfectly optimized, zero-entropy execution.</li>
+                </ul>
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        © 2026 Dimitar Prodromov • QAntum PaaS — Zero Entropy Infrastructure
+    </footer>
+</body>
+</html>

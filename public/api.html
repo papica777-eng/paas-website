@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Reference | QAntum PaaS</title>
+    <link rel="icon" href="/favicon.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syncopate:wght@400;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #030108;
+            --accent-primary: #8b5cf6;
+            --accent-secondary: #06b6d4;
+            --text-primary: #f8fafc;
+            --text-secondary: #a1a1aa;
+            --text-dim: #52525b;
+            --border-subtle: rgba(139, 92, 246, 0.08);
+            --font-display: 'Syncopate', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        .nav {
+            position: fixed;
+            top: 0; width: 100%; z-index: 1000;
+            padding: 16px 40px;
+            display: flex; align-items: center; justify-content: space-between;
+            background: rgba(4, 5, 10, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .nav-logo-group { display: flex; align-items: center; gap: 12px; }
+        .nav-logo {
+            font-family: var(--font-display);
+            font-size: 0.85rem; font-weight: 700; letter-spacing: 3px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 140px auto 80px;
+            padding: 0 40px;
+        }
+
+        h1 {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            margin-bottom: 40px;
+            letter-spacing: 2px;
+        }
+
+        .endpoint {
+            margin-bottom: 60px;
+            padding: 32px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+        }
+
+        .method-path {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .method {
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+        .method.get { background: rgba(16,185,129,0.2); color: #10b981; }
+        .method.post { background: rgba(139,92,246,0.2); color: #8b5cf6; }
+        .path { font-family: var(--font-mono); font-size: 1.1rem; color: #fff; }
+
+        .desc { color: var(--text-secondary); margin-bottom: 24px; font-size: 0.95rem; }
+
+        .code-block {
+            background: #000;
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 20px;
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+            color: #d1d5db;
+        }
+
+        footer {
+            padding: 48px 40px;
+            border-top: 1px solid var(--border-subtle);
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <a href="/" class="nav-logo-group">
+            <img src="/logo-dp.png" alt="DP" style="height: 30px; border: 1px solid var(--accent-primary); border-radius: 4px;">
+            <span class="nav-logo">Nexus API</span>
+        </a>
+        <a href="/" style="font-size: 0.8rem; color: var(--text-secondary);">← Back to Home</a>
+    </nav>
+
+    <div class="container">
+        <h1>API Reference</h1>
+
+        <div class="endpoint">
+            <div class="method-path">
+                <span class="method get">GET</span>
+                <span class="path">/api/health</span>
+            </div>
+            <p class="desc">Check engine status and zero-entropy verification.</p>
+            <div class="code-block">
+{
+  "status": "OPERATIONAL",
+  "engine": "QANTUM_PAAS_V1",
+  "entropy": 0.00,
+  "uptime": 12470
+}
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <div class="method-path">
+                <span class="method get">GET</span>
+                <span class="path">/api/telemetry</span>
+            </div>
+            <p class="desc">Retrieve real-time hardware metrics from the Sovereign host.</p>
+            <div class="code-block">
+{
+  "cpu": { "usage": 42.1, "temp": 58.5 },
+  "ram": { "used": 16428, "total": 24576 },
+  "gpu": "NVIDIA RTX 4090 (Sovereign_Active)"
+}
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <div class="method-path">
+                <span class="method post">POST</span>
+                <span class="path">/api/persona/run</span>
+            </div>
+            <p class="desc">Execute a behavioral node cluster. (Free Tier redirects to Phantom Demo).</p>
+            <div class="code-block">
+{
+  "archetype": "Adrenaline",
+  "config": { "nodes": 100, "sync": "strict" }
+}
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        © 2026 Dimitar Prodromov • QAntum PaaS — API Layer Manifested
+    </footer>
+</body>
+</html>
