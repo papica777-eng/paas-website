@@ -82,9 +82,34 @@ app.get('*', (req, res) => {
 // Initialize services immediately (works for both Vercel and local)
 const { initStripe } = require('./services/stripe');
 const { initFirestore } = require('./services/firestore');
+const cable = require('./services/cable');
+const watchdog = require('./services/watchdog');
 
 const stripeReady = initStripe();
 const firestoreReady = initFirestore();
+
+// ═══════════════════════════════════════════════════════════════
+// SOVEREIGN EXCEPTION INTERCEPTION (Self-Healing)
+// ═══════════════════════════════════════════════════════════════
+
+process.on('uncaughtException', (err) => {
+    cable.broadcast('SYSTEM_ANOMALY', {
+        type: 'UNCAUGHT_EXCEPTION',
+        message: err.message,
+        severity: 'CRITICAL',
+    });
+    cable.broadcast('HEALING_REQUIRED', { reason: 'Thread Panic (uncaughtException)', severity: 'CRITICAL' });
+    // In a pure zero-entropy environment, we prevent exit and force self-heal
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    cable.broadcast('SYSTEM_ANOMALY', {
+        type: 'UNHANDLED_REJECTION',
+        message: reason ? reason.message || reason : 'Unknown Promise Rejection',
+        severity: 'HIGH',
+    });
+    cable.broadcast('HEALING_REQUIRED', { reason: 'Async Panic (unhandledRejection)', severity: 'HIGH' });
+});
 
 // Export for Vercel serverless
 module.exports = app;

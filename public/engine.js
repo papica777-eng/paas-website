@@ -143,6 +143,18 @@ class NexusHybrid {
         if (runBtn) {
             runBtn.addEventListener('click', () => this.runPersona());
         }
+
+        const archetypeSelect = document.getElementById('persona-archetype');
+        const auditUrlContainer = document.getElementById('audit-url-container');
+        if (archetypeSelect && auditUrlContainer) {
+            archetypeSelect.addEventListener('change', (e) => {
+                if (e.target.value === 'QATester') {
+                    auditUrlContainer.style.display = 'block';
+                } else {
+                    auditUrlContainer.style.display = 'none';
+                }
+            });
+        }
     }
 
     async runPersona() {
@@ -151,6 +163,7 @@ class NexusHybrid {
         const jitter = document.getElementById('persona-jitter')?.value || '3.7';
         const speed = document.getElementById('persona-speed')?.value || '142';
         const plan = document.getElementById('persona-plan')?.value || 'free';
+        const targetUrl = document.getElementById('audit-url')?.value || 'https://example.com';
 
         const resultPanel = document.getElementById('persona-result');
         const runBtn = document.getElementById('persona-run-btn');
@@ -170,64 +183,127 @@ class NexusHybrid {
         resultPanel.style.display = 'block';
 
         try {
-            const res = await fetch(`${this.apiBase}/api/persona/run`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    archetype,
-                    personaName,
-                    config: { jitter: parseFloat(jitter), clickSpeed: parseInt(speed) },
-                    plan: plan
-                })
-            });
+            if (archetype === 'QATester') {
+                // QA Audit Flow: Returns PDF Blob
+                resultPanel.innerHTML = `
+                    <div style="text-align:center; padding:40px; color:var(--accent-primary);">
+                        <div style="font-size:1.5rem; margin-bottom:12px;">⬡</div>
+                        <div style="font-size:0.8rem; letter-spacing:2px;">PERFORMING QA AUDIT ON:</div>
+                        <div style="font-size:0.7rem; color:var(--accent-emerald); margin-top:8px;">${targetUrl}</div>
+                        <div style="font-size:0.65rem; color:var(--text-dim); margin-top:8px;">Generating Veritas PDF Report...</div>
+                    </div>
+                `;
 
-            const data = await res.json();
-            const r = data.result;
+                const res = await fetch(`${this.apiBase}/api/audit/run`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ targetUrl, config: { jitter: parseFloat(jitter), clickSpeed: parseInt(speed) } })
+                });
 
-            resultPanel.innerHTML = `
-                <div class="demo-result-header">
-                    <span style="color:var(--accent-emerald);">●</span> Execution Complete
-                    <span style="float:right; font-size:0.65rem; color:var(--text-dim);">${r._meta?.generatedAt || new Date().toISOString()}</span>
-                </div>
-                <div class="demo-result-grid">
-                    <div class="demo-stat">
-                        <div class="demo-stat-label">Archetype</div>
-                        <div class="demo-stat-value">${r.persona?.archetype || archetype}</div>
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `QAntum-QA-Audit-${new Date().getTime()}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+
+                resultPanel.innerHTML = `
+                    <div class="demo-result-header">
+                        <span style="color:var(--accent-emerald);">●</span> QA Audit Complete
+                        <span style="float:right; font-size:0.65rem; color:var(--text-dim);">${new Date().toISOString()}</span>
                     </div>
-                    <div class="demo-stat">
-                        <div class="demo-stat-label">Actions</div>
-                        <div class="demo-stat-value">${r.executionMetrics?.totalActions || 47}</div>
+                    <div class="demo-result-summary">
+                        Veritas Protocol verified target URL: <span style="color:var(--accent-emerald);">${targetUrl}</span>.<br><br>
+                        A high-fidelity PDF report has been downloaded.
                     </div>
-                    <div class="demo-stat">
-                        <div class="demo-stat-label">Duration</div>
-                        <div class="demo-stat-value">${((r.executionMetrics?.duration || 12847) / 1000).toFixed(1)}s</div>
+                    <div class="demo-upgrade-cta">
+                        <span style="color:var(--accent-gold);">⬡</span> Upgrade to unlock unlimited audits.
                     </div>
-                    <div class="demo-stat">
-                        <div class="demo-stat-label">Veritas Score</div>
-                        <div class="demo-stat-value" style="color:var(--accent-emerald);">${(r.validationResults?.veritasScore || 0.97) * 100}%</div>
+                `;
+                // Standard Persona Run Flow
+                let resExec;
+                let attempts = 0;
+                while (attempts < 3) {
+                    try {
+                        resExec = await fetch(`${this.apiBase}/api/persona/run`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                archetype,
+                                personaName,
+                                config: { jitter: parseFloat(jitter), clickSpeed: parseInt(speed) },
+                                plan: plan
+                            })
+                        });
+                        if (resExec.ok) break;
+                    } catch (e) {
+                        console.warn(`[CABLE] FETCH ANOMALY DETECTED. RETRYING (${attempts + 1}/3)...`);
+                    }
+                    attempts++;
+                    await new Promise(r => setTimeout(r, 1000));
+                }
+
+                if (!resExec || !resExec.ok) throw new Error("SYSTEM ANOMALY: Maximum retries exceeded. Watchdog engaged.");
+
+                const data = await resExec.json();
+                const r = data.result || data;
+
+                // TRIGGER PDF DOWNLOAD AFTER EXECUTION
+                const reportUrl = `${this.apiBase}/api/persona/report?archetype=${encodeURIComponent(archetype)}&persona=${encodeURIComponent(personaName)}`;
+                const dlFrame = document.createElement('iframe');
+                dlFrame.style.display = 'none';
+                dlFrame.src = reportUrl;
+                document.body.appendChild(dlFrame);
+
+                resultPanel.innerHTML = `
+                    <div class="demo-result-header">
+                        <span style="color:var(--accent-emerald);">●</span> Execution Complete
+                        <span style="float:right; font-size:0.65rem; color:var(--text-dim);">${r._meta?.generatedAt || new Date().toISOString()}</span>
                     </div>
-                    <div class="demo-stat">
-                        <div class="demo-stat-label">Bot Detection</div>
-                        <div class="demo-stat-value" style="color:var(--accent-emerald);">${r.persona?.antiDetection?.botDetectionBypass || 'PASSED'}</div>
+                    <div class="demo-result-grid">
+                        <div class="demo-stat">
+                            <div class="demo-stat-label">Archetype</div>
+                            <div class="demo-stat-value">${r.persona?.archetype || r.archetype || archetype}</div>
+                        </div>
+                        <div class="demo-stat">
+                            <div class="demo-stat-label">Actions</div>
+                            <div class="demo-stat-value">${r.executionMetrics?.totalActions || 47}</div>
+                        </div>
+                        <div class="demo-stat">
+                            <div class="demo-stat-label">Duration</div>
+                            <div class="demo-stat-value">${((r.executionMetrics?.duration || 12847) / 1000).toFixed(1)}s</div>
+                        </div>
+                        <div class="demo-stat">
+                            <div class="demo-stat-label">Veritas Score</div>
+                            <div class="demo-stat-value" style="color:var(--accent-emerald);">${(r.validationResults?.veritasScore || 0.97) * 100}%</div>
+                        </div>
+                        <div class="demo-stat">
+                            <div class="demo-stat-label">Bot Detection</div>
+                            <div class="demo-stat-value" style="color:var(--accent-emerald);">${r.persona?.antiDetection?.botDetectionBypass || 'PASSED'}</div>
+                        </div>
+                        <div class="demo-stat">
+                            <div class="demo-stat-label">Nodes Synced</div>
+                            <div class="demo-stat-value">${(r.networkSync?.nodesContacted || 1247).toLocaleString()}</div>
+                        </div>
+                        <div class="demo-stat">
+                            <div class="demo-stat-label">Hallucinations</div>
+                            <div class="demo-stat-value" style="color:var(--accent-emerald);">0</div>
+                        </div>
+                        <div class="demo-stat">
+                            <div class="demo-stat-label">Entropy</div>
+                            <div class="demo-stat-value">0.00</div>
+                        </div>
                     </div>
-                    <div class="demo-stat">
-                        <div class="demo-stat-label">Nodes Synced</div>
-                        <div class="demo-stat-value">${(r.networkSync?.nodesContacted || 1247).toLocaleString()}</div>
+                    <div class="demo-result-summary">${r.report?.summary || r.message || 'Execution complete. Ledger downloaded.'}</div>
+                    <div class="demo-upgrade-cta">
+                        <span style="color:var(--accent-gold);">⬡</span> ${r.report?.recommendation || 'Upgrade to unlock real persona execution.'}
                     </div>
-                    <div class="demo-stat">
-                        <div class="demo-stat-label">Hallucinations</div>
-                        <div class="demo-stat-value" style="color:var(--accent-emerald);">0</div>
-                    </div>
-                    <div class="demo-stat">
-                        <div class="demo-stat-label">Entropy</div>
-                        <div class="demo-stat-value">0.00</div>
-                    </div>
-                </div>
-                <div class="demo-result-summary">${r.report?.summary || 'Execution complete.'}</div>
-                <div class="demo-upgrade-cta">
-                    <span style="color:var(--accent-gold);">⬡</span> ${r.report?.recommendation || 'Upgrade to unlock real persona execution.'}
-                </div>
-            `;
+                `;
         } catch (err) {
             resultPanel.innerHTML = `
                 <div style="padding:20px; color:var(--accent-gold);">

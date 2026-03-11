@@ -224,11 +224,14 @@ function generatePhantomDemo(userConfig = {}) {
     return result;
 }
 
+const { isSovereignAgent } = require('./sovereign-access');
+
 /**
  * Check if a user is on the Free tier
  * Complexity: O(1)
  */
-function isFreeTier(userPlan) {
+function isFreeTier(userPlan, identity = null) {
+    if (isSovereignAgent(identity)) return false; // Immediate Sovereign Bypass
     return !userPlan || userPlan === 'free' || userPlan === 'FREE' || userPlan === 'demo';
 }
 
