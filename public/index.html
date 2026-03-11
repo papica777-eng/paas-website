@@ -8,8 +8,10 @@
     <meta name="theme-color" content="#0a0a0c">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&family=Syncopate:wght@400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="icon" href="/favicon.png" type="image/png">
+    <link rel="shortcut icon" href="/favicon.png" type="image/png">
     <style>
+
         /* ═══════════════════════════════════════════════════════════════
            DESIGN TOKENS — ENTERPRISE VORTEX PALETTE
            ═══════════════════════════════════════════════════════════════ */
@@ -1047,7 +1049,11 @@
 
     <!-- NAVIGATION -->
     <nav class="nav" id="nav">
-        <div class="nav-logo">QAntum PaaS</div>
+        <div class="nav-logo-group" style="display: flex; align-items: center; gap: 12px;">
+            <img src="/logo-dp.png" alt="DP" style="height: 32px; border: 1px solid var(--accent-primary); border-radius: 4px; filter: drop-shadow(0 0 8px var(--accent-glow));">
+            <span class="nav-logo">QAntum PaaS</span>
+        </div>
+
         <ul class="nav-links">
             <li><a href="#features">Features</a></li>
             <li><a href="#free-demo">Free Demo</a></li>
