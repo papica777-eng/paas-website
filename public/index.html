@@ -884,6 +884,162 @@
             width: 40px;
             height: 16px;
         }
+
+        /* ═══════════════════════════════════════════════════════════════
+           FREE TIER — PERSONA BUILDER
+           ═══════════════════════════════════════════════════════════════ */
+        .persona-builder-section {
+            padding: 80px 40px;
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+        .persona-builder-card {
+            background: linear-gradient(135deg, rgba(15,8,30,0.95), rgba(10,5,20,0.85));
+            border: 1px solid rgba(139,92,246,0.2);
+            border-radius: var(--radius-md);
+            padding: 48px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .persona-builder-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+        .persona-builder-header h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        .persona-free-badge {
+            padding: 6px 16px;
+            background: rgba(16,185,129,0.12);
+            border: 1px solid rgba(16,185,129,0.3);
+            border-radius: 100px;
+            font-size: 0.7rem;
+            color: var(--accent-emerald);
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        .persona-form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+        .persona-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .persona-field label {
+            font-size: 0.72rem;
+            color: var(--text-dim);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .persona-field input,
+        .persona-field select {
+            padding: 12px 16px;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            font-size: 0.85rem;
+            transition: border-color 0.3s;
+        }
+        .persona-field input:focus,
+        .persona-field select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+        .persona-field select option {
+            background: #0a0a0c;
+        }
+        .persona-run-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--accent-primary), #6d28d9);
+            border: none;
+            border-radius: var(--radius-sm);
+            color: white;
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+        }
+        .persona-run-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 25px var(--accent-glow);
+        }
+        .persona-run-btn:disabled {
+            opacity: 0.6;
+            cursor: wait;
+            transform: none;
+        }
+        #persona-result {
+            display: none;
+            margin-top: 28px;
+            padding: 28px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+        }
+        .demo-result-header {
+            font-size: 0.82rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .demo-result-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .demo-stat {
+            text-align: center;
+        }
+        .demo-stat-label {
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .demo-stat-value {
+            font-family: var(--font-display);
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+        .demo-result-summary {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 16px;
+            padding: 16px;
+            background: rgba(139,92,246,0.05);
+            border-radius: var(--radius-sm);
+        }
+        .demo-upgrade-cta {
+            font-size: 0.78rem;
+            color: var(--accent-gold);
+            font-weight: 500;
+            text-align: center;
+            padding: 12px;
+            background: rgba(245,158,11,0.06);
+            border: 1px solid rgba(245,158,11,0.15);
+            border-radius: var(--radius-sm);
+        }
+        @media (max-width: 768px) {
+            .persona-form-grid { grid-template-columns: 1fr; }
+            .demo-result-grid { grid-template-columns: repeat(2, 1fr); }
+            .persona-builder-card { padding: 24px; }
+        }
     </style>
 </head>
 <body>
@@ -894,6 +1050,7 @@
         <div class="nav-logo">QAntum PaaS</div>
         <ul class="nav-links">
             <li><a href="#features">Features</a></li>
+            <li><a href="#free-demo">Free Demo</a></li>
             <li><a href="#dashboard">Dashboard</a></li>
             <li><a href="#pricing">Pricing</a></li>
             <li><a href="#safety">Safety</a></li>
@@ -1033,6 +1190,52 @@
         </div>
     </section>
 
+    <!-- ══════════════════════════════ FREE TIER PERSONA BUILDER ══════════════════════════════ -->
+    <section class="persona-builder-section" id="free-demo">
+        <div class="section-label reveal">Free Tier</div>
+        <h2 class="section-title reveal">Build Your Persona — Free</h2>
+        <p class="section-desc reveal">
+            Configure a custom behavioral persona and see it execute in real-time.
+            No credit card. No setup. Just build and run.
+        </p>
+
+        <div class="persona-builder-card reveal">
+            <div class="persona-builder-header">
+                <h3>⬡ Persona Configurator</h3>
+                <span class="persona-free-badge">FREE — NO LIMITS</span>
+            </div>
+
+            <div class="persona-form-grid">
+                <div class="persona-field">
+                    <label>Persona Name</label>
+                    <input type="text" id="persona-name" placeholder="e.g. NightCrawler-7" value="NightCrawler-7">
+                </div>
+                <div class="persona-field">
+                    <label>Archetype</label>
+                    <select id="persona-archetype">
+                        <option value="Adrenaline">⚡ Adrenaline — Fast, aggressive clicks</option>
+                        <option value="Fatigue">🌙 Fatigue — Slow, organic browsing</option>
+                        <option value="Sovereign">👑 Sovereign — Methodical, precise</option>
+                        <option value="Ghost">👻 Ghost — Minimal footprint</option>
+                        <option value="Berserker">🔥 Berserker — Chaos pattern</option>
+                    </select>
+                </div>
+                <div class="persona-field">
+                    <label>Mouse Jitter Amplitude</label>
+                    <input type="number" id="persona-jitter" placeholder="3.7" value="3.7" step="0.1" min="0" max="20">
+                </div>
+                <div class="persona-field">
+                    <label>Click Speed (ms)</label>
+                    <input type="number" id="persona-speed" placeholder="142" value="142" step="5" min="50" max="2000">
+                </div>
+            </div>
+
+            <button class="persona-run-btn" id="persona-run-btn">▶ Run Persona</button>
+
+            <div id="persona-result"></div>
+        </div>
+    </section>
+
     <!-- ══════════════════════════════ PRICING ══════════════════════════════ -->
     <section class="pricing-section" id="pricing">
         <div class="section-label reveal">Pricing</div>
@@ -1058,7 +1261,7 @@
                     <li>Email support</li>
                     <li>Community access</li>
                 </ul>
-                <a href="https://buy.stripe.com/test_starter_qantum" class="btn-stripe-ghost" data-testid="stripe-starter">
+                <a href="#" class="btn-stripe-ghost" data-testid="stripe-starter" onclick="event.preventDefault(); window.nexus && qantumCheckout('starter')">
                     Start Free Trial
                 </a>
             </div>
@@ -1079,7 +1282,7 @@
                     <li>Custom persona archetypes</li>
                     <li>API key management</li>
                 </ul>
-                <a href="https://buy.stripe.com/test_pro_qantum" class="btn-stripe" data-testid="stripe-professional">
+                <a href="#" class="btn-stripe" data-testid="stripe-professional" onclick="event.preventDefault(); window.nexus && qantumCheckout('professional')">
                     Start Free Trial
                 </a>
             </div>
@@ -1101,7 +1304,7 @@
                     <li>SOC 2 compliance reports</li>
                     <li>On-premise deployment option</li>
                 </ul>
-                <a href="https://buy.stripe.com/test_enterprise_qantum" class="btn-stripe" data-testid="stripe-enterprise">
+                <a href="#" class="btn-stripe" data-testid="stripe-enterprise" onclick="event.preventDefault(); window.nexus && qantumCheckout('enterprise')">
                     Contact Sales
                 </a>
             </div>
@@ -1123,7 +1326,7 @@
                     <li>Custom Veritas rules</li>
                     <li>Perpetual license option</li>
                 </ul>
-                <a href="https://buy.stripe.com/test_singularity_qantum" class="btn-enterprise" data-testid="stripe-singularity">
+                <a href="#" class="btn-enterprise" data-testid="stripe-singularity" onclick="event.preventDefault(); window.nexus && qantumCheckout('singularity')">
                     Talk to Architect
                 </a>
             </div>
@@ -1506,14 +1709,42 @@
         // ── LIVE TELEMETRY (HYBRID) ──
         // Driven by NexusHybrid in engine.js
 
-        // ── SMOOTH SCROLL ──
+        // ── SMOOTH SCROLL (skip checkout buttons) ──
         document.querySelectorAll('a[href^="#"]').forEach(a => {
             a.addEventListener('click', function(e) {
+                if (this.getAttribute('onclick')) return; // skip checkout buttons
                 e.preventDefault();
                 const t = document.querySelector(this.getAttribute('href'));
                 if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
         });
+    </script>
+
+    <!-- CHECKOUT INTEGRATION -->
+    <script>
+        // Complexity: O(1)
+        async function qantumCheckout(planId) {
+            const email = prompt('Enter your email to start checkout:');
+            if (!email || !email.includes('@')) {
+                alert('Valid email required.');
+                return;
+            }
+            try {
+                const res = await fetch('/api/checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ plan: planId, email })
+                });
+                const data = await res.json();
+                if (data.url) {
+                    window.location.href = data.url;
+                } else {
+                    alert(data.error || 'Checkout error. Try again.');
+                }
+            } catch (err) {
+                alert('Connection error: ' + err.message);
+            }
+        }
     </script>
     <script src="engine.js"></script>
 </body>

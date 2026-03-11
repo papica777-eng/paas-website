@@ -1,0 +1,23 @@
+{
+  "name": "qantum-paas-fullstack",
+  "version": "1.0.0",
+  "description": "QAntum PaaS — Personas as a Service. Fullstack backend with Stripe, Firebase, and real telemetry.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "firebase-admin": "^13.7.0",
+    "stripe": "^17.6.0",
+    "cors": "^2.8.5",
+    "helmet": "^8.0.0",
+    "dotenv": "^16.4.7"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "author": "Dimitar Prodromov",
+  "license": "UNLICENSED"
+}
