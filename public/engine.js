@@ -150,6 +150,7 @@ class NexusHybrid {
         const personaName = document.getElementById('persona-name')?.value || 'Custom Agent';
         const jitter = document.getElementById('persona-jitter')?.value || '3.7';
         const speed = document.getElementById('persona-speed')?.value || '142';
+        const plan = document.getElementById('persona-plan')?.value || 'free';
 
         const resultPanel = document.getElementById('persona-result');
         const runBtn = document.getElementById('persona-run-btn');
@@ -162,7 +163,7 @@ class NexusHybrid {
         resultPanel.innerHTML = `
             <div style="text-align:center; padding:40px; color:var(--accent-primary);">
                 <div style="font-size:1.5rem; margin-bottom:12px;">⬡</div>
-                <div style="font-size:0.8rem; letter-spacing:2px;">DEPLOYING PERSONA NODE...</div>
+                <div style="font-size:0.8rem; letter-spacing:2px;">DEPLOYING ${plan.toUpperCase()} NODE...</div>
                 <div style="font-size:0.65rem; color:var(--text-dim); margin-top:8px;">Syncing with Hydra Network...</div>
             </div>
         `;
@@ -176,7 +177,7 @@ class NexusHybrid {
                     archetype,
                     personaName,
                     config: { jitter: parseFloat(jitter), clickSpeed: parseInt(speed) },
-                    plan: 'free'
+                    plan: plan
                 })
             });
 
