@@ -996,24 +996,24 @@
 
             <div class="dashboard-grid reveal">
                 <div class="dash-card">
-                    <div class="dash-label">Ghost Headcount</div>
-                    <div class="dash-value" id="live-nodes" style="color: var(--accent-secondary);">1,940,281</div>
-                    <div class="dash-trend trend-up">↑ Autonomous scaling</div>
+                    <div class="dash-label">Total Revenue (MIDAS)</div>
+                    <div class="dash-value" id="dash-revenue" style="color: var(--accent-emerald);">$542,000</div>
+                    <div class="dash-trend trend-up">↑ Auto-scaling ROI</div>
                 </div>
                 <div class="dash-card">
-                    <div class="dash-label">Hydra Sync</div>
-                    <div class="dash-value" id="live-sync" style="color: var(--accent-emerald);">99.97%</div>
-                    <div class="dash-trend trend-up">↑ Zero drift</div>
+                    <div class="dash-label">Pipeline Value</div>
+                    <div class="dash-value" id="dash-pipeline" style="color: var(--accent-gold);">$2.4M</div>
+                    <div class="dash-trend trend-up">↑ 128 new leads</div>
+                </div>
+                <div class="dash-card">
+                    <div class="dash-label">Swarm Active Nodes</div>
+                    <div class="dash-value" id="dash-swarm" style="color: var(--accent-secondary);">1,845,201</div>
+                    <div class="dash-trend trend-accent">◆ Neural Sync Active</div>
                 </div>
                 <div class="dash-card">
                     <div class="dash-label">System Entropy</div>
-                    <div class="dash-value" style="color: var(--accent-primary);">0.00</div>
-                    <div class="dash-trend trend-accent">◆ Absolute Determinism</div>
-                </div>
-                <div class="dash-card">
-                    <div class="dash-label">Safety Checks</div>
-                    <div class="dash-value" id="live-checks" style="color: var(--accent-gold);">0</div>
-                    <div class="dash-trend trend-up">↑ 0 blocked</div>
+                    <div class="dash-value" id="dash-entropy" style="color: var(--accent-primary);">0.00</div>
+                    <div class="dash-trend trend-accent">◆ Deterministic State</div>
                 </div>
             </div>
 
@@ -1023,8 +1023,9 @@
                     <span class="orb-text">Soul Loop</span>
                 </div>
                 <div class="telemetry-bar">
-                    <span>CPU: <span id="cpu">2.1%</span></span>
-                    <span>MEM: <span id="mem">8.4GB</span></span>
+                    <span>CPU: <span id="tel-cpu">24.0%</span></span>
+                    <span>MEM: <span id="tel-ram">14.8GB</span></span>
+                    <span>TEMP: <span id="tel-temp">42.0°C</span></span>
                     <span>PQC: <span id="pqc" style="color: var(--accent-emerald);">ACTIVE</span></span>
                     <span>VERITAS: <span style="color: var(--accent-emerald);">ENFORCED</span></span>
                 </div>
@@ -1502,19 +1503,8 @@
                 ? 'rgba(139,92,246,0.2)' : 'rgba(139,92,246,0.08)';
         });
 
-        // ── LIVE TELEMETRY ──
-        let safetyChecks = 0;
-        setInterval(() => {
-            const nodes = 1940000 + Math.floor(Math.random() * 500);
-            const f = nodes.toLocaleString();
-            document.getElementById('live-nodes').textContent = f;
-            document.getElementById('hero-nodes').textContent = f;
-            document.getElementById('cpu').textContent = (1.2 + Math.random() * 2.5).toFixed(1) + '%';
-            document.getElementById('mem').textContent = (8.1 + Math.random() * 0.6).toFixed(1) + 'GB';
-            safetyChecks += Math.floor(Math.random() * 3);
-            document.getElementById('live-checks').textContent = safetyChecks.toLocaleString();
-            document.getElementById('live-sync').textContent = (99.9 + Math.random() * 0.09).toFixed(2) + '%';
-        }, 3000);
+        // ── LIVE TELEMETRY (HYBRID) ──
+        // Driven by NexusHybrid in engine.js
 
         // ── SMOOTH SCROLL ──
         document.querySelectorAll('a[href^="#"]').forEach(a => {
@@ -1525,5 +1515,6 @@
             });
         });
     </script>
+    <script src="engine.js"></script>
 </body>
 </html>
