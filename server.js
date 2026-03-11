@@ -79,14 +79,18 @@ app.get('*', (req, res) => {
 // INITIALIZATION
 // ═══════════════════════════════════════════════════════════════
 
-async function boot() {
-    // Initialize services
-    const { initStripe } = require('./services/stripe');
-    const { initFirestore } = require('./services/firestore');
-    
-    const stripeReady = initStripe();
-    const firestoreReady = initFirestore();
-    
+// Initialize services immediately (works for both Vercel and local)
+const { initStripe } = require('./services/stripe');
+const { initFirestore } = require('./services/firestore');
+
+const stripeReady = initStripe();
+const firestoreReady = initFirestore();
+
+// Export for Vercel serverless
+module.exports = app;
+
+// Local / Render: start HTTP server
+if (!process.env.VERCEL) {
     app.listen(PORT, () => {
         console.log(`
 ╔═══════════════════════════════════════════════════════════════╗
@@ -104,8 +108,3 @@ async function boot() {
         `);
     });
 }
-
-boot().catch(err => {
-    console.error('[BOOT] FATAL:', err.message);
-    process.exit(1);
-});
