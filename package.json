@@ -15,7 +15,8 @@
     "helmet": "^8.0.0",
     "node-telegram-bot-api": "^0.67.0",
     "pdfkit": "^0.17.2",
-    "stripe": "^17.6.0"
+    "stripe": "^17.6.0",
+    "ws": "^8.21.3"
   },
   "engines": {
     "node": ">=18.0.0"
